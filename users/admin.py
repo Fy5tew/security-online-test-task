@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as DefaultUserAdmin
-from .models import User
+from .models import UserType, User
 
 
 class UserAdmin(DefaultUserAdmin):
@@ -28,4 +28,5 @@ class UserAdmin(DefaultUserAdmin):
     )
 
 
+admin.site.register(UserType)
 admin.site.register(User, UserAdmin)
