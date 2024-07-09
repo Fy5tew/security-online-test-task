@@ -6,7 +6,9 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 
 
 class UserType(models.Model):
-    """Модель, представляющая тип пользователя системы"""
+    """
+    Модель, представляющая тип пользователя системы
+    """
 
     title = models.CharField(max_length=255, unique=True)
 
