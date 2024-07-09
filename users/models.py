@@ -5,6 +5,12 @@ from django.contrib.auth.models import PermissionsMixin
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 
 
+class UserType(models.Model):
+    """Модель, представляющая тип пользователя системы"""
+
+    title = models.CharField(max_length=255, unique=True)
+
+
 class UserManager(BaseUserManager):
     """
     Менеджер для модели User, учитывающий новое поле - phone.
@@ -53,6 +59,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     last_name = models.CharField(max_length=150, blank=True)
     first_name = models.CharField(max_length=150, blank=True)
     patronymic = models.CharField(max_length=150, blank=True)
+    user_type = models.ForeignKey(UserType, on_delete=models.CASCADE, null=True)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     date_joined = models.DateTimeField(default=timezone.now)
