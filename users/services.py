@@ -3,7 +3,7 @@ from django.conf import settings
 
 def is_user_type_allowed(user) -> bool:
     """
-    Проверяет, является ли тип пользователя разрешенным.
+    Проверяет, является ли тип пользователя user разрешенным.
     """
 
     if not user.user_type:
@@ -14,7 +14,7 @@ def is_user_type_allowed(user) -> bool:
 
 def is_user_employee(user) -> bool:
     """
-    Проверяет, является ли пользователь сотрудником.
+    Проверяет, является ли пользователь user сотрудником.
     """
 
     if not user.user_type:
@@ -25,7 +25,7 @@ def is_user_employee(user) -> bool:
 
 def is_user_customer(user) -> bool:
     """
-    Проверяет, является ли пользователь заказчиком.
+    Проверяет, является ли пользователь user заказчиком.
     """
 
     if not user.user_type:

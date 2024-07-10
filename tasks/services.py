@@ -8,7 +8,7 @@ from .models import Task
 
 def get_user_tasks(user):
     """
-    Получает список задач, доступных пользователю.
+    Получает список задач, доступных пользователю user.
     """
 
     tasks = Task.objects.all()
@@ -23,6 +23,10 @@ def get_user_tasks(user):
 
 
 def take_task(task, user):
+    """
+    Отмечает задачу task как выполняемую сотрудником user.
+    """
+
     if not user_services.is_user_employee(user):
         raise TypeError("Take task can only employees")
     if not task.status == 'pending':
@@ -34,6 +38,10 @@ def take_task(task, user):
 
 
 def close_task(task):
+    """
+    Отмечает задачу task как выполненную.
+    """
+
     if task.status == 'completed':
         raise ValueError("Task is already closed")
     if not task.report or not task.report.strip():
