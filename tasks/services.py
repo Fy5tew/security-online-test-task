@@ -37,11 +37,13 @@ def take_task(task, user):
     task.save()
 
 
-def close_task(task):
+def close_task(task, user):
     """
     Отмечает задачу task как выполненную.
     """
 
+    if task.customer != user and task.employee != user:
+        raise TypeError("Close task can only it's customer or employee")
     if task.status == 'completed':
         raise ValueError("Task is already closed")
     if not task.report or not task.report.strip():

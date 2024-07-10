@@ -87,8 +87,8 @@ class TakeTaskView(views.APIView):
                 raise exceptions.NotFound
             services.take_task(task, request.user)
             return Response(serializers.TaskSerializer(task).data)
-        except TypeError:
-            raise exceptions.PermissionDenied
+        except TypeError as ex:
+            raise exceptions.PermissionDenied(ex)
         except ValueError as ex:
             raise exceptions.PermissionDenied(ex)
 
@@ -117,9 +117,9 @@ class CloseTaskView(views.APIView):
             task = self.get_queryset().first()
             if not task:
                 raise exceptions.NotFound
-            services.close_task(task)
+            services.close_task(task, request.user)
             return Response(serializers.TaskSerializer(task).data)
-        except TypeError:
-            raise exceptions.PermissionDenied()
+        except TypeError as ex:
+            raise exceptions.PermissionDenied(ex)
         except ValueError as ex:
             raise exceptions.PermissionDenied(ex)
