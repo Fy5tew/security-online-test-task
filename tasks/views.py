@@ -43,3 +43,14 @@ class GetTaskView(generics.RetrieveAPIView):
             )
         except TypeError:
             raise exceptions.PermissionDenied
+
+
+class CreateTaskView(generics.CreateAPIView):
+    serializer_class = serializers.TaskSerializer
+    permission_classes = [
+        permissions.IsAuthenticated,
+        users_permissions.CustomerOnly,
+    ]
+
+    def perform_create(self, serializer):
+        serializer.save(status='pending', customer=self.request.user)

@@ -23,5 +23,17 @@ class Task(models.Model):
     customer = models.ForeignKey('users.User', related_name='customer', on_delete=models.CASCADE, null=False, blank=False)
     employee = models.ForeignKey('users.User', related_name='employee', on_delete=models.SET_NULL, null=True, blank=True)
 
+    def save(self, *args, **kwargs):
+        allowed_statuses = list(map(lambda s: s[0], self.STATUSES))
+
+        print(allowed_statuses)
+
+        if self.status not in allowed_statuses:
+            raise TypeError(
+                f"Status can take only one of the following values: {', '.join(allowed_statuses)}"
+            )
+
+        super(Task, self).save(*args, **kwargs)
+
     def __str__(self):
         return self.title
