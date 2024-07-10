@@ -1,4 +1,5 @@
-from rest_framework import generics, permissions, exceptions
+from rest_framework import views, generics, permissions, exceptions
+from rest_framework.response import Response
 
 from users import permissions as users_permissions
 
@@ -58,3 +59,33 @@ class CreateTaskView(generics.CreateAPIView):
 
     def perform_create(self, serializer):
         serializer.save(status='pending', customer=self.request.user)
+
+
+class TakeTaskView(views.APIView):
+    """
+    Представление для принятия задачи.
+    """
+
+    permission_classes = [
+        permissions.IsAuthenticated,
+        users_permissions.EmployeeOnly,
+    ]
+
+    def get_queryset(self):
+        try:
+            return (
+                services.get_user_tasks(self.request.user)
+                .filter(id=self.kwargs['pk'])
+            )
+        except TypeError:
+            raise exceptions.PermissionDenied
+
+    def put(self, request, pk, **kwargs):
+        try:
+            task = self.get_queryset().first()
+            services.take_task(task, request.user)
+            return Response(serializers.TaskSerializer(task).data)
+        except TypeError:
+            raise exceptions.PermissionDenied
+        except ValueError as ex:
+            raise exceptions.PermissionDenied(ex)
