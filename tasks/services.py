@@ -1,4 +1,5 @@
 from django.db.models import Q
+from django.utils import timezone
 
 from users import services as user_services
 
@@ -29,4 +30,15 @@ def take_task(task, user):
 
     task.status = 'ongoing'
     task.employee = user
+    task.save()
+
+
+def close_task(task):
+    if task.status == 'completed':
+        raise ValueError("Task is already closed")
+    if not task.report or not task.report.strip():
+        raise ValueError("Cannot close task without report")
+
+    task.status = 'completed'
+    task.closing_date = timezone.now()
     task.save()

@@ -83,9 +83,43 @@ class TakeTaskView(views.APIView):
     def put(self, request, pk, **kwargs):
         try:
             task = self.get_queryset().first()
+            if not task:
+                raise exceptions.NotFound
             services.take_task(task, request.user)
             return Response(serializers.TaskSerializer(task).data)
         except TypeError:
             raise exceptions.PermissionDenied
+        except ValueError as ex:
+            raise exceptions.PermissionDenied(ex)
+
+
+class CloseTaskView(views.APIView):
+    """
+    Представление для закрытия задачи.
+    """
+
+    permission_classes = [
+        permissions.IsAuthenticated,
+        users_permissions.AllowedUserType,
+    ]
+
+    def get_queryset(self):
+        try:
+            return (
+                services.get_user_tasks(self.request.user)
+                .filter(id=self.kwargs['pk'])
+            )
+        except TypeError:
+            raise exceptions.PermissionDenied
+
+    def put(self, request, pk, **kwargs):
+        try:
+            task = self.get_queryset().first()
+            if not task:
+                raise exceptions.NotFound
+            services.close_task(task)
+            return Response(serializers.TaskSerializer(task).data)
+        except TypeError:
+            raise exceptions.PermissionDenied()
         except ValueError as ex:
             raise exceptions.PermissionDenied(ex)
