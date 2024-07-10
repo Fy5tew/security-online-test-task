@@ -60,7 +60,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     )
 
     phone = models.CharField(unique=True, max_length=16, validators=[phone_validator])
-    email = models.EmailField(unique=True, blank=True)
+    email = models.EmailField(null=True, blank=True)
     last_name = models.CharField(max_length=150, blank=True)
     first_name = models.CharField(max_length=150, blank=True)
     patronymic = models.CharField(max_length=150, blank=True)
