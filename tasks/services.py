@@ -67,3 +67,15 @@ def close_task(task, user):
     task.status = 'completed'
     task.closing_date = timezone.now()
     task.save()
+
+
+def check_edit_task_permissions(task, user):
+    """
+    Выполняет проверку возможности пользователя изменять задачу.
+    """
+
+    if task.customer != user and task.employee != user:
+        raise TypeError("Edit task can only it's customer or employee")
+    if task.status == 'completed':
+        raise ValueError("Cannot edit completed task")
+

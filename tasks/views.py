@@ -1,59 +1,31 @@
-from rest_framework import views, generics, permissions, exceptions
+from rest_framework import views, generics
 from rest_framework.response import Response
 
 from users import permissions as users_permissions
 
-from . import services
+from . import mixins
 from . import serializers
 
 
-class GetTasksView(generics.ListAPIView):
+class GetTasksView(mixins.TaskApiViewMixin, generics.ListAPIView):
     """
     Представление для получения списка задач.
     """
 
-    serializer_class = serializers.TaskSerializer
-    permission_classes = [
-        permissions.IsAuthenticated,
-        users_permissions.AllowedUserType,
-    ]
 
-    def get_queryset(self):
-        try:
-            return services.get_user_tasks(self.request.user)
-        except TypeError:
-            raise exceptions.PermissionDenied
-
-
-class GetTaskView(generics.RetrieveAPIView):
+class GetTaskView(mixins.TaskApiViewMixin, generics.RetrieveAPIView):
     """
     Представление для получения конкретной задачи из списка задач, доступных пользователю.
     """
 
-    serializer_class = serializers.TaskSerializer
-    permission_classes = [
-        permissions.IsAuthenticated,
-        users_permissions.AllowedUserType,
-    ]
 
-    def get_queryset(self):
-        try:
-            return (
-                services.get_user_tasks(self.request.user)
-                .filter(id=self.kwargs['pk'])
-            )
-        except TypeError:
-            raise exceptions.PermissionDenied
-
-
-class CreateTaskView(generics.CreateAPIView):
+class CreateTaskView(mixins.TaskApiViewMixin, generics.CreateAPIView):
     """
     Представление для создания новой задачи.
     """
 
-    serializer_class = serializers.TaskSerializer
+    serializer_class = serializers.TaskCreateSerializer
     permission_classes = [
-        permissions.IsAuthenticated,
         users_permissions.CustomerOnly,
     ]
 
@@ -61,97 +33,59 @@ class CreateTaskView(generics.CreateAPIView):
         serializer.save(status='pending', customer=self.request.user)
 
 
-class TakeTaskView(views.APIView):
+class UpdateTaskView(mixins.TaskApiViewMixin, generics.UpdateAPIView):
+    """
+    Представление для обновления задачи.
+    """
+
+    serializer_class = serializers.TaskUpdateSerializer
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=kwargs.get('partial', False))
+        serializer.is_valid(raise_exception=True)
+
+        self.check_update_current_task_permissions(request.user)
+
+        self.perform_update(serializer)
+
+        return Response(serializer.data)
+
+
+class TakeTaskView(mixins.TaskApiViewMixin, views.APIView):
     """
     Представление для принятия задачи.
     """
 
     permission_classes = [
-        permissions.IsAuthenticated,
         users_permissions.EmployeeOnly,
     ]
 
-    def get_queryset(self):
-        try:
-            return (
-                services.get_user_tasks(self.request.user)
-                .filter(id=self.kwargs['pk'])
-            )
-        except TypeError:
-            raise exceptions.PermissionDenied
-
-    def put(self, request, pk, **kwargs):
-        try:
-            task = self.get_queryset().first()
-            if not task:
-                raise exceptions.NotFound
-            services.take_task(task, request.user)
-            return Response(serializers.TaskSerializer(task).data)
-        except TypeError as ex:
-            raise exceptions.PermissionDenied(ex)
-        except ValueError as ex:
-            raise exceptions.PermissionDenied(ex)
+    def put(self, request, **kwargs):
+        return self.take_current_task(request.user)
 
 
-class DeclineTaskView(views.APIView):
+class DeclineTaskView(mixins.TaskApiViewMixin, views.APIView):
     """
     Представление для отмены работы над задачей.
     """
 
     permission_classes = [
-        permissions.IsAuthenticated,
         users_permissions.EmployeeOnly,
     ]
 
-    def get_queryset(self):
-        try:
-            return (
-                services.get_user_tasks(self.request.user)
-                .filter(id=self.kwargs['pk'])
-            )
-        except TypeError:
-            raise exceptions.PermissionDenied
-
-    def put(self, request, pk, **kwargs):
-        try:
-            task = self.get_queryset().first()
-            if not task:
-                raise exceptions.NotFound
-            services.decline_task(task, request.user)
-            return Response(serializers.TaskSerializer(task).data)
-        except TypeError as ex:
-            raise exceptions.PermissionDenied(ex)
-        except ValueError as ex:
-            raise exceptions.PermissionDenied(ex)
+    def put(self, request, **kwargs):
+        return self.decline_current_task(request.user)
 
 
-class CloseTaskView(views.APIView):
+class CloseTaskView(mixins.TaskApiViewMixin, views.APIView):
     """
     Представление для закрытия задачи.
     """
 
     permission_classes = [
-        permissions.IsAuthenticated,
         users_permissions.AllowedUserType,
     ]
 
-    def get_queryset(self):
-        try:
-            return (
-                services.get_user_tasks(self.request.user)
-                .filter(id=self.kwargs['pk'])
-            )
-        except TypeError:
-            raise exceptions.PermissionDenied
-
     def put(self, request, pk, **kwargs):
-        try:
-            task = self.get_queryset().first()
-            if not task:
-                raise exceptions.NotFound
-            services.close_task(task, request.user)
-            return Response(serializers.TaskSerializer(task).data)
-        except TypeError as ex:
-            raise exceptions.PermissionDenied(ex)
-        except ValueError as ex:
-            raise exceptions.PermissionDenied(ex)
+        return self.close_current_task(request.user)
