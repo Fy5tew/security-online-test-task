@@ -11,5 +11,6 @@ urlpatterns = [
     path('create', views.CreateTaskView.as_view(), name='create_task'),
     # path('<int:pk>/update', , name='update_task'),
     path('<int:pk>/take', views.TakeTaskView.as_view(), name='take_task'),
+    # path('<int:pk>/decline', , name='decline_task'),
     path('<int:pk>/close', views.CloseTaskView.as_view(), name='close_task'),
 ]
