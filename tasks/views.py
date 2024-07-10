@@ -8,7 +8,7 @@ from . import serializers
 
 class GetTasksView(generics.ListAPIView):
     """
-    Представление для получения списка задач
+    Представление для получения списка задач.
     """
 
     serializer_class = serializers.TaskSerializer
@@ -46,6 +46,10 @@ class GetTaskView(generics.RetrieveAPIView):
 
 
 class CreateTaskView(generics.CreateAPIView):
+    """
+    Представление для создания новой задачи.
+    """
+
     serializer_class = serializers.TaskSerializer
     permission_classes = [
         permissions.IsAuthenticated,
