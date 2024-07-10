@@ -37,6 +37,21 @@ def take_task(task, user):
     task.save()
 
 
+def decline_task(task, user):
+    """
+    Отменяет выполнение задачи пользователем.
+    """
+
+    if task.employee != user:
+        raise TypeError("Decline task can only it's employee")
+    if not task.status == "ongoing":
+        raise TypeError("Only ongoing tasks can be declined")
+
+    task.status = 'pending'
+    task.employee = None
+    task.save()
+
+
 def close_task(task, user):
     """
     Отмечает задачу task как выполненную.

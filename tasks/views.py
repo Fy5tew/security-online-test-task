@@ -93,6 +93,38 @@ class TakeTaskView(views.APIView):
             raise exceptions.PermissionDenied(ex)
 
 
+class DeclineTaskView(views.APIView):
+    """
+    Представление для отмены работы над задачей.
+    """
+
+    permission_classes = [
+        permissions.IsAuthenticated,
+        users_permissions.EmployeeOnly,
+    ]
+
+    def get_queryset(self):
+        try:
+            return (
+                services.get_user_tasks(self.request.user)
+                .filter(id=self.kwargs['pk'])
+            )
+        except TypeError:
+            raise exceptions.PermissionDenied
+
+    def put(self, request, pk, **kwargs):
+        try:
+            task = self.get_queryset().first()
+            if not task:
+                raise exceptions.NotFound
+            services.decline_task(task, request.user)
+            return Response(serializers.TaskSerializer(task).data)
+        except TypeError as ex:
+            raise exceptions.PermissionDenied(ex)
+        except ValueError as ex:
+            raise exceptions.PermissionDenied(ex)
+
+
 class CloseTaskView(views.APIView):
     """
     Представление для закрытия задачи.
